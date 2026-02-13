@@ -1,0 +1,553 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String?
+  email     String   @unique
+  password  String
+  role      Role     @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bookings  Booking[]
+  vouchers  CreditVoucher[]
+  refundRequests RefundRequest[]
+  additionalBedRequests AdditionalBedRequest[] 
+
+  reviews   Review[]
+}
+
+model Property {
+  id            Int      @id @default(autoincrement())
+  title         String
+  slug          String   @unique
+  description   String
+  address       String
+  city          String
+  country       String
+  maxGuests     Int
+  pricePerNight Int
+
+  // optional content
+  longDescription   String?
+  checkInFrom       String?  // "14:00"
+  checkInTo         String?  // "22:00"
+  checkOutUntil     String?  // "11:00"
+
+  // optional pricing rules
+  weeklyDiscountBps Int?     // 0..10000
+  cleaningFeeCents  Int?
+  minNights         Int?
+
+  // optional specs
+  bedrooms          Int?
+  bathrooms         Int?
+  areaSqm           Int?
+  latitude          Float?
+  longitude         Float?
+
+  // Postgres-native tags array
+  tags              String[] @default([])
+
+  images            PropertyImage[]
+  bookings          Booking[]
+  manualBlocks      ManualBlock[]
+  externalBlocks    ExternalBlock[]
+  externalCalendars ExternalCalendar[]
+  bookingPeriods    BookingPeriod[]
+
+  //relations
+  features   PropertyFeature[]
+  amenities  PropertyAmenity[]
+  policies   PropertyPolicy[]
+  reviews Review[]
+
+  createdAt DateTime @default(now())
+}
+
+
+
+
+model PropertyImage {
+  id         Int      @id @default(autoincrement())
+  propertyId Int
+  url        String
+  sortOrder  Int      @default(0)
+
+  property   Property @relation(fields: [propertyId], references: [id])
+}
+
+model Booking {
+  id         Int   @id @default(autoincrement())
+  propertyId Int
+  userId     Int?
+
+  bookingPeriodId Int?
+
+  startDate   DateTime
+  endDate     DateTime
+  guestName   String
+  guestEmail  String
+  guestPhone  String
+  
+  // Babies (<2) are NOT counted in guestsCount.
+  adults      Int @default(1)
+  children    Int @default(0)
+  babies      Int @default(0)
+  guestsCount Int
+  
+  totalPrice  Int
+
+  priceBreakdown Json?
+  weeklyDiscountAppliedBps Int?
+
+  extraBedsCount Int @default(0) 
+
+  // statuses: pending, confirmed, cancelled
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  property Property @relation(fields: [propertyId], references: [id])
+  user     User?    @relation(fields: [userId], references: [id])
+
+  bookingPeriod BookingPeriod? @relation(fields: [bookingPeriodId], references: [id])
+
+  payment       Payment?
+  cancellation  Cancellation?
+  refundRequests RefundRequest[]
+  additionalBedRequests AdditionalBedRequest[]  
+  
+  review Review?
+  refunds Refund[]
+  
+
+  @@index([propertyId, startDate, endDate])
+  @@index([bookingPeriodId])
+
+  // fast admin listing + stable cursor pagination
+  @@index([createdAt, id])
+
+  // common filters
+  @@index([status, createdAt])
+  @@index([propertyId, createdAt])
+
+  // Optional but helpful: “search by guestEmail/name” becomes less painful
+  // (Note: contains-search won’t fully use indexes, but equality/prefix might, and it helps other plans)
+  @@index([guestEmail])
+}
+
+model Payment {
+  id                   Int      @id @default(autoincrement())
+  bookingId            Int      @unique
+  booking              Booking  @relation(fields: [bookingId], references: [id])
+
+  // stripe | admin
+  provider             String
+  // unpaid | paid | refunded | partially_refunded
+  status               String
+
+  amountCents          Int
+  currency             String   @default("eur")
+  creditsAppliedCents  Int @default(0)
+
+  stripeSessionId      String?  @unique
+  stripePaymentIntentId String? @unique
+
+  refundedCents        Int      @default(0)
+  
+  refunds Refund[]
+
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model Cancellation {
+  id                 Int      @id @default(autoincrement())
+  bookingId           Int      @unique
+  booking             Booking  @relation(fields: [bookingId], references: [id])
+
+  cancelledAt         DateTime @default(now())
+  policyRefundCents   Int      @default(0)
+  voucherIssuedCents  Int      @default(0)
+  reason              String?
+}
+
+model CreditVoucher {
+  id               Int      @id @default(autoincrement())
+  userId           Int
+  user             User     @relation(fields: [userId], references: [id])
+
+  currency         String   @default("eur")
+  originalBookingId Int?
+  issuedCents      Int
+  remainingCents   Int
+  // active | exhausted | expired | revoked
+  status           String   @default("active")
+  expiresAt        DateTime?
+
+  createdAt        DateTime @default(now())
+}
+
+model RefundRequest {
+  id          Int      @id @default(autoincrement())
+  bookingId   Int
+  booking     Booking  @relation(fields: [bookingId], references: [id])
+
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+
+  message     String?
+  // pending | approved | rejected
+  status      String   @default("pending")
+  decidedAt   DateTime?
+  createdAt   DateTime @default(now())
+}
+
+model EmailTemplate {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  subject   String
+  body      String
+  updatedAt DateTime @updatedAt
+}
+
+enum ExternalProvider {
+  BOOKING_COM
+}
+
+model ExternalCalendar {
+  id           Int              @id @default(autoincrement())
+  propertyId   Int
+  provider     ExternalProvider
+  icalUrl      String
+  isEnabled    Boolean          @default(true)
+
+  etag         String?
+  lastModified String?
+  lastSyncAt   DateTime?
+
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  property     Property         @relation(fields: [propertyId], references: [id])
+  blocks       ExternalBlock[]
+
+  @@unique([propertyId, provider])
+}
+
+model ExternalBlock {
+  id           Int              @id @default(autoincrement())
+  calendarId   Int
+  propertyId   Int
+  provider     ExternalProvider
+
+  externalUid  String
+  startDate    DateTime
+  endDate      DateTime
+  summary      String?
+
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  calendar     ExternalCalendar @relation(fields: [calendarId], references: [id])
+  property     Property         @relation(fields: [propertyId], references: [id])
+
+  @@unique([calendarId, externalUid])
+  @@index([propertyId, startDate, endDate])
+}
+
+model ManualBlock {
+  id         Int      @id @default(autoincrement())
+  propertyId Int
+  startDate  DateTime
+  endDate    DateTime
+  reason     String?
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  property   Property @relation(fields: [propertyId], references: [id])
+
+  @@index([propertyId, startDate, endDate])
+}
+
+model ContactMessage {
+  id        Int      @id @default(autoincrement())
+  fullName  String
+  email     String
+  phone     String?
+  message   String
+  createdAt DateTime @default(now())
+  handled   Boolean  @default(false)
+}
+
+// ==========================
+// PERIODS
+// ==========================
+model BookingPeriod {
+  id         Int      @id @default(autoincrement())
+  propertyId Int
+
+  startDate  DateTime
+  endDate    DateTime
+
+  isOpen     Boolean  @default(true)
+
+  standardNightlyPrice Int
+
+  weeklyDiscountPercentBps Int?
+  weeklyThresholdNights    Int @default(7)
+
+  minNights Int @default(1)
+
+  maxGuests Int
+
+  name      String?
+  notes     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  property  Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  bookings  Booking[]
+
+  @@index([propertyId, startDate, endDate])
+}
+
+model Review {
+  id         Int      @id @default(autoincrement())
+
+  propertyId Int
+  userId     Int
+  bookingId  Int      @unique   // one review per booking
+
+  // Category ratings (1-5)
+  cleanliness Int
+  comfort     Int
+  amenities   Int
+  location    Int
+  value       Int
+
+  // Final overall rating (1-5)
+  overall     Int
+
+  comment     String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  property Property @relation(fields: [propertyId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+  booking  Booking  @relation(fields: [bookingId], references: [id])
+
+  @@index([propertyId, createdAt])
+  @@index([userId, createdAt])
+}
+
+// Proerty features 
+// Feature keys that to icons in the frontend
+enum PropertyFeatureKey {
+  WHEELCHAIR
+  CRIB
+  PETS_ALLOWED
+  PARKING
+  REFUND_POLICY
+
+  WIFI
+  POOL
+  SEA_VIEW
+  AIR_CONDITIONING
+  BBQ
+  HEATING
+  WASHER
+  KITCHEN
+  WORKSPACE
+}
+
+model PropertyFeature {
+  id         Int                @id @default(autoincrement())
+  propertyId Int
+  key        PropertyFeatureKey
+  sortOrder  Int?
+
+  property   Property           @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([propertyId, key])
+  @@index([propertyId])
+}
+
+model PropertyAmenity {
+  id         Int      @id @default(autoincrement())
+  propertyId Int
+  label      String
+  sortOrder  Int?
+
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+}
+
+model PropertyPolicy {
+  id         Int      @id @default(autoincrement())
+  propertyId Int
+  label      String
+  sortOrder  Int?
+
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+}
+
+model AdditionalBedRequest {
+  id           Int      @id @default(autoincrement())
+
+  bookingId    Int
+  booking      Booking  @relation(fields: [bookingId], references: [id])
+
+  userId       Int
+  user         User     @relation(fields: [userId], references: [id])
+
+  bedsRequested Int     @default(1)
+
+  customerMessage String?
+  adminMessage    String?
+
+  // pending | approved | rejected
+  status       String   @default("pending")
+  decidedAt    DateTime?
+  createdAt    DateTime @default(now())
+
+  // Admin chooses these at approval time (manual payment)
+  // charge | no_charge
+  chargeType   String?
+  amountCents  Int?
+
+  @@index([bookingId])
+  @@index([userId])
+  @@index([status])
+}
+
+//STAY GUIDE 
+model StayGuide {
+  id        Int      @id @default(autoincrement())
+
+  // QR / email token to access public page
+  token     String   @unique
+
+  title     String
+  intro     String?
+
+  published Boolean  @default(true)
+  revokedAt DateTime?
+  expiresAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sections  StayGuideSection[]
+}
+
+model StayGuideSection {
+  id        Int       @id @default(autoincrement())
+  guideId   Int
+  guide     StayGuide @relation(fields: [guideId], references: [id], onDelete: Cascade)
+
+  title     String
+  sortOrder Int       @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  items     StayGuideItem[]
+
+  @@index([guideId])
+}
+
+model StayGuideItem {
+  id            Int              @id @default(autoincrement())
+  sectionId     Int
+  section       StayGuideSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  title         String
+  type          String
+  description   String
+
+  href          String?
+  mapsHref      String?
+  mapsEmbedSrc  String?
+
+  heroImageUrl  String
+  imageUrls     Json?     // string[] stored as Json
+  locationLabel String?
+
+  sortOrder     Int       @default(0)
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([sectionId])
+}
+
+//Refunds 
+
+enum RefundStatus {
+  pending
+  succeeded
+  failed
+  canceled
+}
+
+enum RefundSource {
+  policy_cancel
+  admin_request
+}
+
+model Refund {
+  id                    Int          @id @default(autoincrement())
+
+  bookingId              Int
+  booking                Booking      @relation(fields: [bookingId], references: [id])
+
+  paymentId              Int
+  payment                Payment      @relation(fields: [paymentId], references: [id])
+
+  source                 RefundSource
+  status                 RefundStatus @default(pending)
+
+  amountCents            Int
+  currency               String       @default("eur")
+
+  // Stripe identifiers (prevents double-applying)
+  stripeRefundId         String?      @unique
+  stripePaymentIntentId  String?
+
+  // Link to the "reason container" (optional but super useful)
+  cancellationId         Int?         @unique
+  refundRequestId        Int?         @unique
+
+  failureReason          String?
+
+  createdAt              DateTime     @default(now())
+  updatedAt              DateTime     @updatedAt
+
+  customerNotifiedAt DateTime?
+
+  appliedAt DateTime?
+
+  @@index([bookingId])
+  @@index([paymentId])
+}
+
