@@ -3,7 +3,7 @@
 import { Request, Response } from "express";
 import * as authService from "../services/authService.js";
 import { prisma } from "../prismaClient.js";
-import { loginSchema, registerBodySchema } from "@shared/schemas/auth.schema.js";
+import { loginSchema, registerBodySchema } from "@eagle-villas/shared/schemas/auth.schema";
 import { sendTemplateEmail } from "../services/emailService.js";
 
 /**

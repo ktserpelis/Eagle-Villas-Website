@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { contactSchema } from "@shared/schemas/contact.schema.js";
+import { contactSchema } from "@eagle-villas/shared/schemas/contact.schema";
 import { validateBody } from "../midleware/validateBody.js";
 import { prisma } from "../prismaClient.js";
 import { sendTemplateEmail } from "../services/emailService.js";

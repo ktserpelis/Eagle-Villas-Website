@@ -54,53 +54,6 @@ function requireRatingField(body: any, key: string): number {
   return val;
 }
 
-/**
- * Admin notification hook for low-rated reviews.
- *
- * Implementation strategy:
- * - If your Prisma schema includes `AdminNotification`, we create a record.
- * - If not, we log to server console (so you still get visibility).
- *
- * You can later replace this with:
- * - Email to admin
- * - In-app admin inbox
- * - Slack webhook, etc.
- */
-async function notifyAdminLowRating(params: {
-  reviewId: number;
-  bookingId: number;
-  propertyId: number;
-  overall: number;
-  comment: string | null;
-}) {
-  // Defensive: only trigger for low ratings.
-  if (params.overall > 3) return;
-
-  // Attempt DB notification if the model exists in your schema.
-  // If it doesn't exist, Prisma will throw; we catch and fallback to console.
-  try {
-    // @ts-expect-error - This call is intentionally best-effort and optional.
-    await prisma.adminNotification.create({
-      data: {
-        type: "LOW_REVIEW",
-        message: `Low review (overall ${params.overall}/5) for propertyId=${params.propertyId}, bookingId=${params.bookingId}, reviewId=${params.reviewId}`,
-        meta: {
-          reviewId: params.reviewId,
-          bookingId: params.bookingId,
-          propertyId: params.propertyId,
-          overall: params.overall,
-          comment: params.comment,
-        },
-      },
-    });
-  } catch {
-    // Fallback: log for now. This keeps behavior working without new schema changes.
-    console.warn(
-      `[ADMIN NOTIFY] Low review detected: overall=${params.overall}, reviewId=${params.reviewId}, propertyId=${params.propertyId}, bookingId=${params.bookingId}`
-    );
-  }
-}
-
 /* =========================================================================================
  * CUSTOMER ROUTES
  * ========================================================================================= */
@@ -214,19 +167,6 @@ reviewsRouter.post(
           comment,
         },
       });
-
-      // Notify admin when rating is low (overall <= 3).
-      // This is best-effort and should never block the customer response.
-      notifyAdminLowRating({
-        reviewId: review.id,
-        bookingId,
-        propertyId: booking.propertyId,
-        overall,
-        comment,
-      }).catch((err) => {
-        console.warn("[ADMIN NOTIFY] Failed to notify admin about low rating:", err);
-      });
-
       return res.status(201).json({ review });
     } catch (err) {
       next(err);

@@ -4,7 +4,7 @@ import Stripe from "stripe";
 import { prisma } from "../prismaClient.js";
 import { stripe } from "../stripe/stripeClient.js";
 import { authMiddleware } from "../midleware/authMiddleware.js";
-import { sendTemplateEmail } from "services/emailService.js";
+import { sendTemplateEmail } from "../services/emailService.js";
 
 export const paymentsRouter = Router();
 

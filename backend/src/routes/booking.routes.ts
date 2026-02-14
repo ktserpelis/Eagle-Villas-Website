@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { prisma } from "../prismaClient.js";
-import { createBookingSchema } from "@shared/schemas/booking.schema.js";
+import { createBookingSchema } from "@eagle-villas/shared/schemas/booking.schema";
 import { validateBody } from "../midleware/validateBody.js";
 import { optionalAuthMiddleware } from "../midleware/optionalAuthMiddleware.js";
 import {
@@ -10,7 +10,7 @@ import {
 } from "../services/periods.service.js";
 import { stripe } from "../stripe/stripeClient.js";
 import { REFUND_POLICY, daysBeforeStart, getRefundTier } from "../payments/refundPolicy.js";
-import { bookingQuoteSchema } from "@shared/schemas/bookingQuoteSchema.js";
+import { bookingQuoteSchema } from "@eagle-villas/shared/schemas/bookingQuoteSchema";
 
 export const bookingRouter = Router();
 

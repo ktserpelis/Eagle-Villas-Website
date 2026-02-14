@@ -35,10 +35,10 @@ import { paymentsRouter } from "./routes/payment.routes.js";
 // Jobs
 import { syncBookingComForProperty } from "./services/bookingComIcalSync.js";
 import { startExpirePendingBookingsJob } from "./jobs/expirePendingBookings.js";
-import { adminReviewsRouter, propertyReviewsRouter, reviewsRouter } from "routes/review.routes.js";
-import { publicStayGuideRouter } from "routes/public.stay-guide.routes.js";
-import { adminStayGuideRouter } from "routes/admin.stayguide.routes.js";
-import { refundsRouter } from "routes/payments.refunds.routes.js";
+import { adminReviewsRouter, propertyReviewsRouter, reviewsRouter } from "./routes/review.routes.js";
+import { publicStayGuideRouter } from "./routes/public.stay-guide.routes.js";
+import { adminStayGuideRouter } from "./routes/admin.stayguide.routes.js";
+import { refundsRouter } from "./routes/payments.refunds.routes.js";
 
 dotenv.config();
 

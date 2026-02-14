@@ -3,26 +3,18 @@
     "target": "ES2020",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-
-    "rootDir": "..",
+    "rootDir": "./src",
     "outDir": "./dist",
-
     "strict": true,
     "noImplicitAny": false,
-
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-
     "types": ["node"],
-
-    "baseUrl": "./src",
-    "typeRoots": ["./src/types", "./node_modules/@types"],
-    "paths": {
-      "@shared/*": ["../shared/*"]
-    }
+    "baseUrl": ".",
+    "typeRoots": ["./src/types", "./node_modules/@types"]
   },
-  "include": ["src", "../shared"],
+  "include": ["src"],
   "exclude": ["dist", "node_modules"]
 }

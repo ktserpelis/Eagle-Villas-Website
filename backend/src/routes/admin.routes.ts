@@ -5,7 +5,7 @@ import { prisma } from "../prismaClient.js";
 import {
   createPropertySchema,
   updatePropertySchema,
-} from "@shared/schemas/property.schema.js"; // adjust path/extension as needed
+} from "@eagle-villas/shared/schemas/property.schema"; // adjust path/extension as needed
 
 const router = Router();
 

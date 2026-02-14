@@ -8,7 +8,7 @@ import {
   daysBeforeStart,
   getRefundTier,
 } from "../payments/refundPolicy.js";
-import { sendTemplateEmail } from "services/emailService.js";
+import { sendTemplateEmail } from "../services/emailService.js";
 
 export const refundsRouter = Router();
 

@@ -5,12 +5,12 @@ import { authMiddleware } from "../midleware/authMiddleware.js";
 import {
   createBookingPeriodSchema,
   updateBookingPeriodSchema,
-} from "@shared/schemas/booking.period.schema.js";
+} from "@eagle-villas/shared/schemas/booking.period.schema";
 import { ensureNoPeriodOverlap } from "../services/periods.service.js";
 
 // NOTE: Make sure this path is correct in your project.
 // In your other files you used "../midleware/...". Keep it consistent.
-import { requireRole } from "midleware/requireRole.js";
+import { requireRole } from "../midleware/requireRole.js";
 
 import { parseDateOnlyToUtcMidnight } from "../utils/dateOnly.js";
 

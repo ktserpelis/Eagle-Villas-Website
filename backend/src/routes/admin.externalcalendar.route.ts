@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { prisma } from "../prismaClient.js";
 import { validateBody } from "../midleware/validateBody.js";
-import { upsertBookingComIcalSchema } from "@shared/schemas/externalcalendar.schema.js";
+import { upsertBookingComIcalSchema } from "@eagle-villas/shared/schemas/externalcalendar.schema";
 import { syncBookingComForProperty } from "../services/bookingComIcalSync.js";
 import { authMiddleware } from "../midleware/authMiddleware.js";
 import { requireRole } from "../midleware/requireRole.js";
