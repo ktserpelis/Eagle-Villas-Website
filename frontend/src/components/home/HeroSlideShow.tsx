@@ -17,11 +17,24 @@ const slides = [
   },
   {
     id: 3,
-    image: "/images/homehero/Screenshot 2025-01-28 183637.webp",
-    title: "Discover the beauty of Sivota & Lefkas",
-    subtitle: "Sail to nearby islands, explore charming villages, or unwind on pristine beaches — adventure and serenity await just beyond your private retreat.",
+    image: "/images/homeherosplit/image00021.webp",
+    title: "Refined elegance with panoramic views",
+    subtitle: "Wake up to Ionian blue horizons, relax on sun-drenched terraces, and experience true privacy in a setting designed for unforgettable moments.",
+  },
+  {
+    id: 4,
+    image: "/images/location/image00020.webp",
+    title: "Moments designed for relaxation",
+    subtitle: "Outdoor living spaces, tranquil surroundings, and warm Mediterranean light create the perfect setting for slow, luxurious days.",
+  },
+  {
+    id: 5,
+    image: "/images/image00019.jpeg",
+    title: "Luxury living in harmony with nature",
+    subtitle: "Thoughtfully designed interiors and serene landscapes blend seamlessly, offering comfort, beauty, and effortless island living.",
   },
 ];
+
 
 export default function HeroSlideshow() {
   const [current, setCurrent] = useState(0);
@@ -63,7 +76,7 @@ export default function HeroSlideshow() {
 
         {/* ✅ Reviews trigger (right side) */}
        <div className="absolute z-20 right-[10%] top-[45%] -translate-y-1/2 hidden md:block">
-        <ReviewsPopupCarousel visibleCount={2} />
+        <ReviewsPopupCarousel visibleCount={2} hideIfEmpty  />
       </div>
 
         {/* Foreground content */}

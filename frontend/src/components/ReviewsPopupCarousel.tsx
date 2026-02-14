@@ -32,6 +32,7 @@ type Props = {
    * Higher values improve variety, but cost slightly more payload.
    */
   fetchLimit?: number;
+  hideIfEmpty?: boolean;
 };
 
 function clamp(n: number, min: number, max: number) {
@@ -79,6 +80,7 @@ export default function HeroReviewsMini({
   visibleCount = 3,
   intervalMs = 4200,
   fetchLimit = 18,
+  hideIfEmpty = false,
 }: Props) {
   /**
    * Backend-sourced latest reviews across all properties.
@@ -105,6 +107,11 @@ export default function HeroReviewsMini({
         propertyTitle: r?.property?.title ?? undefined,
       }));
   }, [data?.reviews]);
+
+  // Hide entire widget if no reviews and hideIfEmpty is enabled
+  if (hideIfEmpty && !isLoading && !isError && list.length === 0) {
+    return null;
+  }
 
   const showCount = Math.min(3, Math.max(1, visibleCount));
   const canScroll = list.length > showCount;
@@ -206,7 +213,6 @@ export default function HeroReviewsMini({
                     </div>
                   </div>
 
-                  {/* Property name provides context when reviews come from multiple villas */}
                   {r.propertyTitle ? (
                     <div className="mt-0.5 text-[11px] text-white/70 truncate">
                       {r.propertyTitle}
