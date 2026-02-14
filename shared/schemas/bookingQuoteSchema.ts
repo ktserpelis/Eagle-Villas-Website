@@ -1,16 +1,17 @@
 import { z } from "zod";
-import { createBookingSchema } from "./booking.schema.js";
+import { bookingBaseObjectSchema } from "./booking.schema.js";
 
 /**
  * Quote schema:
- * Uses the same base rules as booking creation (dates, guests, credit),
- * but does not require guest contact fields because no booking is created yet.
+ * Same base fields as booking, but no guest contact fields required.
  */
-export const bookingQuoteSchema = createBookingSchema
+export const bookingQuoteSchema = bookingBaseObjectSchema
   .omit({
     guestName: true,
     guestEmail: true,
     guestPhone: true,
+    totalPrice: true,
+    status: true,
   })
   .strict();
 
