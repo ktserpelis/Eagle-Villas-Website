@@ -108,11 +108,6 @@ export default function HeroReviewsMini({
       }));
   }, [data?.reviews]);
 
-  // Hide entire widget if no reviews and hideIfEmpty is enabled
-  if (hideIfEmpty && !isLoading && !isError && list.length === 0) {
-    return null;
-  }
-
   const showCount = Math.min(3, Math.max(1, visibleCount));
   const canScroll = list.length > showCount;
 
@@ -133,6 +128,11 @@ export default function HeroReviewsMini({
     }
     return out;
   }, [list, showCount, start]);
+
+  // Hide entire widget if no reviews and hideIfEmpty is enabled
+  if (hideIfEmpty && !isLoading && !isError && list.length === 0) {
+    return null;
+  }
 
   return (
     <div
