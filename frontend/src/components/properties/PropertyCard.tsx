@@ -60,12 +60,6 @@ export default function PropertyCard({ property: p }: Props) {
         />
 
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/10 to-black/35 pointer-events-none" />
-
-        {/* Price Pill (Backend-sourced price) */}
-        <div className="absolute bottom-4 left-4 inline-flex items-baseline gap-2 rounded-full bg-amber-100/95 px-4 py-2 text-sm font-extrabold text-stone-900 shadow shadow-stone-900/20">
-          €{p.pricePerNight}
-          <span className="text-xs font-semibold text-stone-700">/ night</span>
-        </div>
       </div>
 
       {/* Bottom Info Section */}

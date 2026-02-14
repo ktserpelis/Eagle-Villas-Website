@@ -39,6 +39,7 @@ import { adminReviewsRouter, propertyReviewsRouter, reviewsRouter } from "./rout
 import { publicStayGuideRouter } from "./routes/public.stay-guide.routes.js";
 import { adminStayGuideRouter } from "./routes/admin.stayguide.routes.js";
 import { refundsRouter } from "./routes/payments.refunds.routes.js";
+import { publicIcalExportRouter } from "./routes/public.calendar.export.route.js";
 
 dotenv.config();
 
@@ -185,6 +186,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/customer", customerRouter);
 app.use("/api/reviews", reviewsRouter);
 
+app.use("/api", publicIcalExportRouter);
 app.use("/api/admin", adminRoutes);
 app.use("/api/admin", adminEmailTemplatesRouter);
 app.use("/api/admin", adminExternalCalendarsRouter);

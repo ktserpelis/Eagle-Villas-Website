@@ -69,7 +69,7 @@ export default function BookingPage() {
     nights && typeof p.pricePerNight === "number" ? nights * p.pricePerNight : null;
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-6">
+    <div className="mx-auto max-w-4xl px-4 py-6 pt-24">
       <Link
         to={`/properties/${p.slug}`}
         className="inline-flex items-center gap-2 text-sm font-medium text-stone-700 hover:text-stone-900"
