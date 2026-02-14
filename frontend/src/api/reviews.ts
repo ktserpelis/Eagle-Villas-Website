@@ -153,7 +153,7 @@ export type LatestReviewsResponse = {
  * POST /api/reviews
  */
 async function createReview(payload: CreateReviewPayload): Promise<{ review: Review }> {
-  const res = await api.post<{ review: Review }>("/reviews", payload);
+  const res = await api.post<{ review: Review }>("/api/reviews", payload);
   return res.data;
 }
 
@@ -161,7 +161,7 @@ async function createReview(payload: CreateReviewPayload): Promise<{ review: Rev
  * PATCH /api/reviews/:id
  */
 async function updateReview(id: number, payload: UpdateReviewPayload): Promise<{ review: Review }> {
-  const res = await api.patch<{ review: Review }>(`/reviews/${id}`, payload);
+  const res = await api.patch<{ review: Review }>(`/api/reviews/${id}`, payload);
   return res.data;
 }
 
@@ -169,7 +169,7 @@ async function updateReview(id: number, payload: UpdateReviewPayload): Promise<{
  * DELETE /api/reviews/:id
  */
 async function deleteReview(id: number): Promise<{ message: string }> {
-  const res = await api.delete<{ message: string }>(`/reviews/${id}`);
+  const res = await api.delete<{ message: string }>(`/api/reviews/${id}`);
   return res.data;
 }
 
@@ -177,7 +177,7 @@ async function deleteReview(id: number): Promise<{ message: string }> {
  * GET /api/reviews/me
  */
 async function fetchMyReviews(): Promise<MyReviewsResponse> {
-  const res = await api.get<MyReviewsResponse>("/reviews/me");
+  const res = await api.get<MyReviewsResponse>("/api/reviews/me");
   return res.data;
 }
 
@@ -226,7 +226,7 @@ export function useDeleteReview() {
  * GET /api/properties/:propertyId/reviews
  */
 async function fetchPropertyReviews(propertyId: number): Promise<PropertyReviewsResponse> {
-  const res = await api.get<PropertyReviewsResponse>(`/properties/${propertyId}/reviews`);
+  const res = await api.get<PropertyReviewsResponse>(`/api/properties/${propertyId}/reviews`);
   return res.data;
 }
 
@@ -249,7 +249,7 @@ export function usePropertyReviewsQuery(propertyId: number, enabled = true) {
  * Fetch latest reviews across all properties for global UI surfaces.
  */
 async function fetchLatestReviews(limit = 12): Promise<LatestReviewsResponse> {
-  const res = await api.get<LatestReviewsResponse>(`/reviews/latest?limit=${limit}`);
+  const res = await api.get<LatestReviewsResponse>(`/api/reviews/latest?limit=${limit}`);
   return res.data;
 }
 
@@ -275,7 +275,7 @@ export function useLatestReviewsQuery(limit = 12, enabled = true) {
  * GET /api/admin/reviews
  */
 async function fetchAdminReviews(params: AdminReviewsParams): Promise<AdminReviewsListResponse> {
-  const res = await api.get<AdminReviewsListResponse>("/admin/reviews", { params });
+  const res = await api.get<AdminReviewsListResponse>("/api/admin/reviews", { params });
   return res.data;
 }
 
@@ -343,7 +343,7 @@ export function useAdminPropertyReviewsQuery(
  * DELETE /api/admin/reviews/:id
  */
 async function adminDeleteReview(id: number): Promise<{ message: string }> {
-  const res = await api.delete<{ message: string }>(`/admin/reviews/${id}`);
+  const res = await api.delete<{ message: string }>(`/api/admin/reviews/${id}`);
   return res.data;
 }
 

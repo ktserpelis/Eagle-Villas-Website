@@ -27,7 +27,7 @@ async function fetchCustomerVouchers(): Promise<CustomerVouchersResponse> {
    * The backend implementation in customer.routes.ts exposes:
    *   GET /api/customer/vouchers
    */
-  const res = await api.get<CustomerVouchersResponse>("/customer/vouchers");
+  const res = await api.get<CustomerVouchersResponse>("/api/customer/vouchers");
   return res.data;
 }
 
@@ -59,7 +59,7 @@ export type AdminVouchersResponse = {
 };
 
 async function fetchAdminVouchers(): Promise<AdminVouchersResponse> {
-  const res = await api.get<AdminVouchersResponse>("/payments/admin/vouchers");
+  const res = await api.get<AdminVouchersResponse>("/api/payments/admin/vouchers");
   return res.data;
 }
 

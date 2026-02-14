@@ -6,7 +6,7 @@ import type { EmailTemplatesResponse, EmailTemplate } from "./types";
 export const EMAIL_TEMPLATES_QUERY_KEY = ["admin-email-templates"] as const;
 
 async function fetchEmailTemplates(): Promise<EmailTemplatesResponse> {
-  const res = await api.get<EmailTemplatesResponse>("/admin/email-templates");
+  const res = await api.get<EmailTemplatesResponse>("/api/admin/email-templates");
   return res.data;
 }
 
@@ -28,7 +28,7 @@ async function createEmailTemplate(
   payload: CreateEmailTemplatePayload
 ): Promise<EmailTemplate> {
   const res = await api.post<{ template: EmailTemplate }>(
-    `/admin/email-templates`,
+    `/api/admin/email-templates`,
     payload
   );
   return res.data.template;
@@ -54,7 +54,7 @@ async function updateEmailTemplate(
   payload: UpdateEmailTemplatePayload
 ): Promise<EmailTemplate> {
   const res = await api.put<{ template: EmailTemplate }>(
-    `/admin/email-templates/${payload.key}`,
+    `/api/admin/email-templates/${payload.key}`,
     { subject: payload.subject, body: payload.body }
   );
   return res.data.template;
@@ -71,7 +71,7 @@ export function useUpdateEmailTemplateMutation() {
 }
 
 async function deleteEmailTemplate(key: string): Promise<{ ok: true }> {
-  const res = await api.delete<{ ok: true }>(`/admin/email-templates/${key}`);
+  const res = await api.delete<{ ok: true }>(`/api/admin/email-templates/${key}`);
   return res.data;
 }
 

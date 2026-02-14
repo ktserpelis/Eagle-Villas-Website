@@ -65,7 +65,7 @@ export function useBookingQuote(input: BookingQuoteInput | null) {
   return useQuery({
     queryKey: ["bookingQuote", input],
     queryFn: async () => {
-      const res = await api.post<BookingQuoteResponse>("/bookings/quote", input);
+      const res = await api.post<BookingQuoteResponse>("/api/bookings/quote", input);
       return res.data;
     },
     enabled: !!input,

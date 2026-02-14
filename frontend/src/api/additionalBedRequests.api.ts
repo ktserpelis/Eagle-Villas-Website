@@ -21,13 +21,13 @@ export type AdditionalBedRequest = {
 export const requestAdditionalBed = (
   bookingId: number,
   data: { bedsRequested: number; message?: string }
-) => api.post(`/payments/additional-bed-request/${bookingId}`, data);
+) => api.post(`/api/payments/additional-bed-request/${bookingId}`, data);
 
 /* ================= ADMIN ================= */
 
 export const fetchAdditionalBedRequests = (status: AdditionalBedRequestStatus = "pending") =>
   api.get<{ additionalBedRequests: AdditionalBedRequest[] }>(
-    `/payments/admin/additional-bed-requests?status=${status}`
+    `/api/payments/admin/additional-bed-requests?status=${status}`
   );
 
 export const approveAdditionalBedRequest = (
@@ -36,7 +36,7 @@ export const approveAdditionalBedRequest = (
     | { chargeType: "no_charge"; adminMessage?: string }
     | { chargeType: "charge"; amountCents: number; adminMessage?: string }
 ) =>
-  api.post(`/payments/admin/additional-bed-requests/${requestId}/approve`, data);
+  api.post(`/api/payments/admin/additional-bed-requests/${requestId}/approve`, data);
 
 export const rejectAdditionalBedRequest = (requestId: number, adminMessage?: string) =>
-  api.post(`/payments/admin/additional-bed-requests/${requestId}/reject`, { adminMessage });
+  api.post(`/api/payments/admin/additional-bed-requests/${requestId}/reject`, { adminMessage });

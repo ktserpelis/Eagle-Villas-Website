@@ -16,14 +16,14 @@ export const ADMIN_BOOKINGS_QUERY_KEY = ["admin", "bookings"] as const;
    =========================== */
 
 async function fetchAdminProperties(): Promise<AdminPropertyListResponse> {
-  const res = await api.get<AdminPropertyListResponse>("/admin/properties");
+  const res = await api.get<AdminPropertyListResponse>("/api/admin/properties");
   return res.data;
 }
 
 async function fetchAdminBookings(
   params?: Record<string, any>
 ): Promise<AdminBookingListResponse & { nextCursorId?: number | null; blocksRequireRange?: boolean }> {
-  const res = await api.get("/admin/bookings", { params });
+  const res = await api.get("/api/admin/bookings", { params });
   return res.data;
 }
 
@@ -37,6 +37,8 @@ export function useAdminPropertiesQuery() {
     queryFn: fetchAdminProperties,
   });
 }
+
+
 
 export function useAdminBookingsQuery(params?: Record<string, any>) {
   return useQuery({
@@ -53,7 +55,7 @@ async function createProperty(
   data: CreatePropertyInput
 ): Promise<{ property: AdminProperty }> {
   const res = await api.post<{ property: AdminProperty }>(
-    "/admin/properties",
+    "/api/admin/properties",
     data
   );
   return res.data;
@@ -64,14 +66,14 @@ async function updateProperty(
   data: UpdatePropertyInput
 ): Promise<{ property: AdminProperty }> {
   const res = await api.put<{ property: AdminProperty }>(
-    `/admin/properties/${id}`,
+    `/api/admin/properties/${id}`,
     data
   );
   return res.data;
 }
 
 async function deleteProperty(id: number): Promise<void> {
-  await api.delete(`/admin/properties/${id}`);
+  await api.delete(`/api/admin/properties/${id}`);
 }
 
 export function useCreatePropertyMutation() {

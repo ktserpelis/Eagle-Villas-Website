@@ -83,7 +83,7 @@ async function cancelBooking(
 ): Promise<CancelBookingResponse> {
   const { bookingId, ...body } = payload;
   const res = await api.post<CancelBookingResponse>(
-    `/payments/cancel/${bookingId}`,
+    `/api/payments/cancel/${bookingId}`,
     body
   );
   return res.data;
@@ -94,7 +94,7 @@ async function requestRefund(
 ): Promise<RefundRequestResponse> {
   const { bookingId, ...body } = payload;
   const res = await api.post<RefundRequestResponse>(
-    `/payments/refund-request/${bookingId}`,
+    `/api/payments/refund-request/${bookingId}`,
     body
   );
   return res.data;
@@ -104,7 +104,7 @@ async function cancelPreview(
   bookingId: number
 ): Promise<CancelBookingPreviewResponse> {
   const res = await api.get<CancelBookingPreviewResponse>(
-    `/payments/cancel-preview/${bookingId}`
+    `/api/payments/cancel-preview/${bookingId}`
   );
   return res.data;
 }
@@ -113,7 +113,7 @@ async function refundRequestPreview(
   bookingId: number
 ): Promise<RefundRequestPreviewResponse> {
   const res = await api.get<RefundRequestPreviewResponse>(
-    `/payments/refund-request-preview/${bookingId}`
+    `/api/payments/refund-request-preview/${bookingId}`
   );
   return res.data;
 }
@@ -223,7 +223,7 @@ async function adminFetchRefundRequests(
   status: "pending" | "approved" | "rejected"
 ): Promise<AdminRefundRequestsResponse> {
   const res = await api.get<AdminRefundRequestsResponse>(
-    "/payments/admin/refund-requests",
+    "/api/payments/admin/refund-requests",
     { params: { status } }
   );
   return res.data;
@@ -254,7 +254,7 @@ async function adminApproveRefundRequest(
   id: number
 ): Promise<AdminApproveRefundResponse> {
   const res = await api.post<AdminApproveRefundResponse>(
-    `/payments/admin/refund-requests/${id}/approve`
+    `/api/payments/admin/refund-requests/${id}/approve`
   );
   return res.data;
 }
@@ -277,7 +277,7 @@ async function adminRejectRefundRequest(
   id: number
 ): Promise<AdminRejectRefundResponse> {
   const res = await api.post<AdminRejectRefundResponse>(
-    `/payments/admin/refund-requests/${id}/reject`
+    `/api/payments/admin/refund-requests/${id}/reject`
   );
   return res.data;
 }
@@ -315,7 +315,7 @@ async function fetchBookingRefundStatus(
   bookingId: number
 ): Promise<BookingRefundStatusResponse> {
   const res = await api.get<BookingRefundStatusResponse>(
-    `/payments/refund-status/${bookingId}`
+    `/api/payments/refund-status/${bookingId}`
   );
   return res.data;
 }

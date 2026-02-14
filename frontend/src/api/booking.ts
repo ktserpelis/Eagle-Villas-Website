@@ -25,7 +25,7 @@ import type {
 async function createBooking(
   payload: CreateBookingPayload
 ): Promise<CreateBookingResponse> {
-  const res = await api.post<CreateBookingResponse>("/bookings", payload);
+  const res = await api.post<CreateBookingResponse>("/api/bookings", payload);
   return res.data;
 }
 
@@ -57,7 +57,7 @@ export function useCreateBooking() {
  * - Backend must ensure the booking belongs to req.user
  */
 async function fetchCustomerBookingById(id: number): Promise<Booking> {
-  const res = await api.get<Booking>(`/customer/bookings/${id}`);
+  const res = await api.get<Booking>(`/api/customer/bookings/${id}`);
   return res.data;
 }
 
@@ -88,7 +88,7 @@ export function useCustomerBookingByIdQuery(id: number, enabled = true) {
  * - Use this for imperative flows or non-React contexts
  */
 async function fetchCustomerBookings(): Promise<CustomerBookingsResponse> {
-  const res = await api.get<CustomerBookingsResponse>("/customer/bookings");
+  const res = await api.get<CustomerBookingsResponse>("/api/customer/bookings");
   return res.data;
 }
 
@@ -144,7 +144,7 @@ async function fetchPropertyCalendar(
   to: string
 ): Promise<PropertyCalendarResponse> {
   const res = await api.get<PropertyCalendarResponse>(
-    `/bookings/calendar/property/${propertyId}`,
+    `/api/bookings/calendar/property/${propertyId}`,
     { params: { from, to } }
   );
   return res.data;

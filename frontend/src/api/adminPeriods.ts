@@ -24,7 +24,7 @@ function extractErrorMessage(err: any): string {
 export async function adminFetchAdminCalendar(propertyId: number, from: string, to: string) {
   try {
     const res = await api.get<AdminCalendarPayload>(
-      `/admin/calendar/property/${propertyId}`,
+      `/api/admin/calendar/property/${propertyId}`,
       { params: { from, to } }
     );
     return res.data;
@@ -38,7 +38,7 @@ export async function adminFetchAdminCalendar(propertyId: number, from: string, 
  */
 export async function adminFetchPeriods(propertyId: number) {
   try {
-    const res = await api.get(`/admin/properties/${propertyId}/periods`);
+    const res = await api.get(`/api/admin/properties/${propertyId}/periods`);
     return res.data;
   } catch (err: any) {
     throw new Error(extractErrorMessage(err));
@@ -50,7 +50,7 @@ export async function adminFetchPeriods(propertyId: number) {
  */
 export async function adminCreatePeriod(body: any) {
   try {
-    const res = await api.post(`/admin/periods`, body);
+    const res = await api.post(`/api/admin/periods`, body);
     return res.data;
   } catch (err: any) {
     throw new Error(extractErrorMessage(err));
@@ -62,7 +62,7 @@ export async function adminCreatePeriod(body: any) {
  */
 export async function adminPatchPeriod(periodId: number, body: any) {
   try {
-    const res = await api.patch(`/admin/periods/${periodId}`, body);
+    const res = await api.patch(`/api/admin/periods/${periodId}`, body);
     return res.data;
   } catch (err: any) {
     throw new Error(extractErrorMessage(err));
@@ -74,7 +74,7 @@ export async function adminPatchPeriod(periodId: number, body: any) {
  */
 export async function adminDeletePeriod(periodId: number) {
   try {
-    await api.delete(`/admin/periods/${periodId}`);
+    await api.delete(`/api/admin/periods/${periodId}`);
   } catch (err: any) {
     throw new Error(extractErrorMessage(err));
   }
