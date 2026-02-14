@@ -54,7 +54,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setAuthToken(storedToken);
 
     api
-      .get<{ user: AuthUser }>("/auth/me")
+      .get<{ user: AuthUser }>("/api/auth/me")
       .then((res) => {
         setUser(res.data.user);
         localStorage.setItem("user", JSON.stringify(res.data.user));
@@ -78,13 +78,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const login = async (email: string, password: string) => {
-    const res = await api.post<LoginResponse>("/auth/login", { email, password });
+    const res = await api.post<LoginResponse>("/api/auth/login", { email, password });
     authSuccess(res.data.user, res.data.token);
     return res.data.user;
   };
 
   const register = async (name: string, email: string, password: string) => {
-    const res = await api.post<RegisterResponse>("/auth/register", {
+    const res = await api.post<RegisterResponse>("/api/auth/register", {
       name,
       email,
       password,
