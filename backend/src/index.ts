@@ -51,14 +51,23 @@ const PORT = Number(process.env.PORT) || 4000;
 
 app.use(helmet());
 
+// -----------------------------------------------------------------------------
+// CORS (locked down)
+// - Uses APP_URL as the allowed frontend origin (e.g. your Vercel domain)
+// - Allows requests with no Origin header (curl, server-to-server, health checks)
+// -----------------------------------------------------------------------------
+const APP_URL = (process.env.APP_URL || "").trim();
+
 app.use(
   cors({
     origin(origin, callback) {
-      callback(null, true);
+      if (!origin) return callback(null, true);
+      if (APP_URL && origin === APP_URL) return callback(null, true);
+      return callback(new Error(`CORS blocked for origin: ${origin}`));
     },
-    credentials: true,
   })
 );
+
 
 /**
  * STRIPE WEBHOOK (RAW BODY) — MUST be BEFORE express.json()
