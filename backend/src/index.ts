@@ -52,22 +52,75 @@ const PORT = Number(process.env.PORT) || 4000;
 app.use(helmet());
 
 // -----------------------------------------------------------------------------
-// CORS (locked down)
-// - Uses APP_URL as the allowed frontend origin (e.g. your Vercel domain)
-// - Allows requests with no Origin header (curl, server-to-server, health checks)
-// -----------------------------------------------------------------------------
-const APP_URL = (process.env.APP_URL || "").trim();
+// CORS (locked down - production safe)
+//
+// ✔ Uses CORS_ORIGINS (comma-separated list) OR falls back to APP_URL
+// ✔ Allows multiple domains (www + non-www, staging, localhost, etc.)
+// ✔ Normalizes trailing slashes to prevent mismatch errors
+// ✔ Allows requests without Origin header (curl, Stripe webhooks, health checks)
+// ✔ NEVER throws -> prevents accidental 500 errors from CORS
+//
+// Example Render env:
+// CORS_ORIGINS=https://www.eagle-villas.com,https://eagle-villas.com
+// ----------------------------------------------------------------------------- 
+
+/**
+ * Normalize URLs:
+ * - trim whitespace
+ * - remove trailing slash
+ */
+const normalize = (url: string) => url.trim().replace(/\/$/, "");
+
+/**
+ * Read allowed origins from environment.
+ * Prefer CORS_ORIGINS (recommended).
+ * Fallback to APP_URL for backward compatibility.
+ */
+const allowedOrigins = (
+  process.env.CORS_ORIGINS || process.env.APP_URL || ""
+)
+  .split(",")
+  .map(normalize)
+  .filter(Boolean);
+
+// Debug log (safe in production)
+console.log("[CORS] Allowed origins:", allowedOrigins);
 
 app.use(
   cors({
+    /**
+     * Custom origin validator
+     */
     origin(origin, callback) {
-      if (!origin) return callback(null, true);
-      if (APP_URL && origin === APP_URL) return callback(null, true);
-      return callback(new Error(`CORS blocked for origin: ${origin}`));
+      // Allow non-browser requests (no Origin header)
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      const normalizedOrigin = normalize(origin);
+
+      const isAllowed = allowedOrigins.includes(normalizedOrigin);
+
+      // IMPORTANT:
+      // Do NOT pass an Error here.
+      // Passing an error causes Express to return 500.
+      // Instead, pass false to silently block.
+      return callback(null, isAllowed);
     },
+
+    // Allow cookies / auth headers if needed
+    credentials: true,
+
+    // Explicit allowed methods
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+
+    // Allowed headers from frontend
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
+// Ensure preflight OPTIONS requests are handled globally
+app.options("*", cors());
 
 /**
  * STRIPE WEBHOOK (RAW BODY) — MUST be BEFORE express.json()
