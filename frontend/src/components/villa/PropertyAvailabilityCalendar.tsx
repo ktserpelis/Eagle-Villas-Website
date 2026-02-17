@@ -32,11 +32,9 @@ interface Props {
 }
 
 function isoDateOnly(d: Date) {
-  // YYYY-MM-DD in local time
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
+  // Convert the *local calendar day* into a stable UTC YYYY-MM-DD key
+  const utc = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  return utc.toISOString().slice(0, 10); // "YYYY-MM-DD"
 }
 
 function startOfDay(d: Date) {

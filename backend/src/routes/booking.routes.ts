@@ -163,10 +163,7 @@ bookingRouter.get("/calendar/property/:propertyId", async (req, res, next) => {
         select: { id: true, startDate: true, endDate: true, reason: true },
       }),
       prisma.bookingPeriod.findMany({
-        where: {
-          propertyId,
-          ...(rangeWhere as any),
-        },
+        where: { propertyId },
         orderBy: { startDate: "asc" },
         select: {
           id: true,

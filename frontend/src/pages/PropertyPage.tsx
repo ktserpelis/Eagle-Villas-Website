@@ -29,21 +29,38 @@ export default function PropertyPage() {
     return new Date(y, m - 1, d);
   };
 
-  const todayYMD = () => new Date().toISOString().slice(0, 10);
+  const ymdLocal = (d: Date) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+};
+
+  const todayYMD = () => ymdLocal(new Date());
+
   const addMonthsYMD = (months: number) => {
     const d = new Date();
     d.setMonth(d.getMonth() + months);
-    return d.toISOString().slice(0, 10);
+    return ymdLocal(d);
   };
 
+
   const calendarFrom = todayYMD();
-  const calendarTo = addMonthsYMD(6);
+  const calendarTo = addMonthsYMD(12);
 
   const {
     data: calendar,
     isLoading: calendarLoading,
     error: calendarError,
   } = usePropertyCalendar(propertyId, calendarFrom, calendarTo, propertyId > 0);
+
+  useEffect(() => {
+  if (!calendar) return;
+  const openCount = Object.values(calendar.dailyOpen ?? {}).filter(Boolean).length;
+  console.log("hasAnyPeriods:", calendar.hasAnyPeriods, "openDays:", openCount);
+  console.log("sample open keys:", Object.entries(calendar.dailyOpen ?? {}).filter(([,v]) => v).slice(0, 5));
+  console.log("PROPERTY:", { slug, id: p.id, title: p.title });
+}, [calendar]);
 
   const [selectedRange, setSelectedRange] = useState<DateRange | undefined>();
   const [initialCalendarDate, setInitialCalendarDate] = useState<string | undefined>(undefined);
@@ -149,6 +166,7 @@ export default function PropertyPage() {
                 {!calendarLoading && !calendarError && (
                   <PropertyAvailabilityCalendar
                     items={calendar?.blocks}
+                    dailyOpen={calendar?.dailyOpen} 
                     dailyPrices={calendar?.dailyPrices}
                     defaultNightlyPrice={p.pricePerNight}
                     maxGuests={p.maxGuests}
