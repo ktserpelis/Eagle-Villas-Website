@@ -3,7 +3,14 @@ import { useAdminBookingsQuery } from "../../api/admin";
 import type { AdminBooking } from "../../api/types";
 
 function formatRange(startDate: string, endDate: string) {
-  return `${new Date(startDate).toLocaleDateString()} – ${new Date(endDate).toLocaleDateString()}`;
+  const fmt = (d: string) =>
+    new Date(d).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+
+  return `${fmt(startDate)} – ${fmt(endDate)}`;
 }
 
 function badgeClass(source: string, status?: string) {

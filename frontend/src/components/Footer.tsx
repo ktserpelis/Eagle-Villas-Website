@@ -21,7 +21,7 @@ export function Footer() {
           </div>
 
           <p className="text-xs text-stone-300 leading-relaxed max-w-xs">
-            A small collection of villas in Naxos, Greece, designed with warm
+            A small collection of villas in Sivota, Greece, designed with warm
             interiors, sea views and a calm atmosphere.
           </p>
 

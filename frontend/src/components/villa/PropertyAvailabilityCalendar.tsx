@@ -27,19 +27,17 @@ interface Props {
    // When provided (YYYY-MM-DD), calendar jumps to that month
   initialDate?: string;
 
-   // ✅ NEW: availability by YYYY-MM-DD. true only if OPEN period covers that day.
+   // availability by YYYY-MM-DD. true only if OPEN period covers that day.
   dailyOpen?: Record<string, boolean>;
 }
 
-// ---------- helpers ----------
 function isoDateOnly(d: Date) {
   // YYYY-MM-DD in local time
-  const y = d.getUTCFullYear();
-  const m = String(d.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(d.getUTCDate()).padStart(2, "0");
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${day}`;
 }
-
 
 function startOfDay(d: Date) {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
