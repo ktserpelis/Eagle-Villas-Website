@@ -37,7 +37,7 @@ export default function BookingConfirmedPage() {
         {/* Photo header */}
         <div className="relative h-48 sm:h-60 lg:h-64">
           <img
-            src="/images/hero-villa.jpg"
+            src="/images/homehero/image00022.webp"
             alt="Eagle Villas"
             className="h-full w-full object-cover"
             loading="lazy"

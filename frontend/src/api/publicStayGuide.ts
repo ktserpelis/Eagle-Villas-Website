@@ -1,7 +1,11 @@
+import { api } from "./client";
 import type { AdminStayGuide } from "./adminStayGuide";
 
-export async function fetchPublicStayGuide(token: string): Promise<AdminStayGuide> {
-  const res = await fetch(`/api/public/stay-guide/${encodeURIComponent(token)}`);
-  if (!res.ok) throw new Error("Guide not found");
-  return res.json();
+export async function fetchPublicStayGuide(
+  token: string
+): Promise<AdminStayGuide> {
+  const res = await api.get<AdminStayGuide>(
+    `/api/public/stay-guide/${encodeURIComponent(token)}`
+  );
+  return res.data;
 }

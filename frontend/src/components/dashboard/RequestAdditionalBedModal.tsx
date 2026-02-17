@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { requestAdditionalBed } from "../../api/additionalBedRequests.api";
 
 export function RequestAdditionalBedModal({
@@ -16,6 +17,23 @@ export function RequestAdditionalBedModal({
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (!open) return;
+
+    const body = document.body;
+    const prevOverflow = body.style.overflow;
+    const prevPaddingRight = body.style.paddingRight;
+
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    body.style.overflow = "hidden";
+    if (scrollbarWidth > 0) body.style.paddingRight = `${scrollbarWidth}px`;
+
+    return () => {
+      body.style.overflow = prevOverflow;
+      body.style.paddingRight = prevPaddingRight;
+    };
+  }, [open]);
+
   if (!open) return null;
 
   async function submit() {
@@ -32,16 +50,21 @@ export function RequestAdditionalBedModal({
     }
   }
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
-      <div className="w-full max-w-lg rounded-3xl bg-white p-5 shadow-xl">
+  const modal = (
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50"
+      onMouseDown={onClose}
+    >
+      <div
+        className="w-full max-w-lg rounded-3xl bg-white p-5 shadow-xl"
+        onMouseDown={(e) => e.stopPropagation()}
+      >
         <h3 className="text-lg font-semibold text-slate-900">
           Request additional bed
         </h3>
 
         <p className="mt-1 text-sm text-slate-600">
-          Send a request to the admin. They will approve or reject it (and decide
-          if it has a charge).
+          Send a request to the admin. They will approve or reject it.
         </p>
 
         <div className="mt-4 space-y-3">
@@ -68,7 +91,6 @@ export function RequestAdditionalBedModal({
               onChange={(e) => setMessage(e.target.value)}
               rows={3}
               className="mt-1 w-full rounded-2xl border border-stone-200 bg-white px-3 py-2 text-sm text-slate-900"
-              placeholder="e.g. baby bed / extra single bed..."
             />
           </div>
         </div>
@@ -77,7 +99,7 @@ export function RequestAdditionalBedModal({
           <button
             onClick={onClose}
             disabled={loading}
-            className="inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold bg-white text-slate-700 ring-1 ring-inset ring-stone-200 hover:bg-stone-50 transition disabled:opacity-60"
+            className="rounded-full px-4 py-2 text-sm font-semibold bg-white text-slate-700 ring-1 ring-inset ring-stone-200 hover:bg-stone-50 transition disabled:opacity-60"
           >
             Cancel
           </button>
@@ -85,7 +107,7 @@ export function RequestAdditionalBedModal({
           <button
             onClick={submit}
             disabled={loading}
-            className="inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition disabled:opacity-60"
+            className="rounded-full px-4 py-2 text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 transition disabled:opacity-60"
           >
             Submit request
           </button>
@@ -93,4 +115,6 @@ export function RequestAdditionalBedModal({
       </div>
     </div>
   );
+
+  return createPortal(modal, document.body);
 }

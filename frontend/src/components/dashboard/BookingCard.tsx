@@ -125,13 +125,9 @@ export function BookingCard({
   const country = booking.property.country;
 
   /**
-   * Defensive hero image fallback so the layout never breaks
-   * even if a property is missing images.
+   * Default Image
    */
-  const hero =
-    (booking.property as any)?.heroImage ||
-    (booking.property as any)?.image ||
-    "/images/V_IMG_2764.webp";
+  const hero = "/images/homehero/Screenshot 2025-01-28 183616.webp";
 
   const nights = nightsBetween(booking.startDate, booking.endDate);
 

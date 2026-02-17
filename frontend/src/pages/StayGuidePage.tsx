@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import RecommendationCard from "../components/stay-guide/RecommendationCard";
+import { api } from "@/api/client";
 
 /**
  * This page now loads REAL data from the backend public endpoint:
@@ -54,18 +55,11 @@ type ApiStayGuide = {
 };
 
 async function fetchPublicStayGuide(token: string): Promise<ApiStayGuide> {
-  const res = await fetch(`/api/public/stay-guide/${encodeURIComponent(token)}`, {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-  });
+  const res = await api.get<ApiStayGuide>(
+    `/api/public/stay-guide/${encodeURIComponent(token)}`
+  );
 
-  if (!res.ok) {
-    // 404 = not found / not published
-    // 410 = expired/revoked (if you implemented it that way)
-    throw new Error(String(res.status));
-  }
-
-  return (await res.json()) as ApiStayGuide;
+  return res.data;
 }
 
 export default function StayGuidePage() {
@@ -129,7 +123,6 @@ export default function StayGuidePage() {
         </header>
 
         <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-x-8">
-          {/* lightweight skeletons (no new components) */}
           <div className="rounded-3xl border border-amber-200/70 bg-white shadow-sm overflow-hidden">
             <div className="aspect-[16/10] bg-slate-100 animate-pulse" />
             <div className="p-7 space-y-3">
@@ -172,14 +165,12 @@ export default function StayGuidePage() {
 
   return (
     <main className="max-w-6xl mx-auto px-4 pt-24 pb-12">
-      {/* Header */}
       <header className="rounded-[28px] border border-amber-200/70 bg-white shadow-sm overflow-hidden">
         <div className="p-8">
           <p className="text-xs font-semibold tracking-[0.18em] text-amber-700">
             PRIVATE GUEST GUIDE
           </p>
 
-          {/* Less bold page title */}
           <h1 className="mt-2 text-2xl md:text-3xl font-semibold tracking-[-0.01em] text-slate-900">
             {guide.title}
           </h1>
@@ -192,11 +183,9 @@ export default function StayGuidePage() {
         <div className="h-px w-full bg-gradient-to-r from-transparent via-amber-200/70 to-transparent" />
       </header>
 
-      {/* Sections */}
       <div className="mt-10 space-y-12">
         {sortedSections.map((section) => (
           <section key={section.id}>
-            {/* More distinct category title (not heavy bold) */}
             <div className="flex items-end justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="h-6 w-[3px] rounded-full bg-amber-200/80" />
