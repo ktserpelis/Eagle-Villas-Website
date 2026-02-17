@@ -2,7 +2,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import RecommendationCard from "../components/stay-guide/RecommendationCard";
-import { api } from "@/api/client";
+import type { AdminStayGuide } from "@/api/adminStayGuide";
+import { fetchPublicStayGuide } from "@/api/publicStayGuide";
 
 /**
  * This page now loads REAL data from the backend public endpoint:
@@ -54,14 +55,6 @@ type ApiStayGuide = {
   sections: ApiStayGuideSection[];
 };
 
-async function fetchPublicStayGuide(token: string): Promise<ApiStayGuide> {
-  const res = await api.get<ApiStayGuide>(
-    `/api/public/stay-guide/${encodeURIComponent(token)}`
-  );
-
-  return res.data;
-}
-
 export default function StayGuidePage() {
   const { token } = useParams();
   const [guide, setGuide] = useState<ApiStayGuide | null>(null);
@@ -79,9 +72,9 @@ export default function StayGuidePage() {
 
       setStatus("loading");
       try {
-        const data = await fetchPublicStayGuide(token);
+        const data = (await fetchPublicStayGuide(token)) as unknown as AdminStayGuide;
         if (cancelled) return;
-        setGuide(data);
+        setGuide(data as unknown as ApiStayGuide);
         setStatus("ok");
       } catch {
         if (cancelled) return;
