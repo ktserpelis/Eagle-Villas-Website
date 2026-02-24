@@ -12,9 +12,11 @@ export function Footer() {
         {/* Brand / description */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-full border border-amber-300/70 bg-amber-900/70 flex items-center justify-center text-[11px] font-bold text-amber-100 shadow-md">
-              EV
-            </div>
+            <img
+                  src="/images/logo/logo eagle villas.jpg"
+                  alt="Eagle Villas Logo"
+                  className="h-10 w-auto object-contain rounded-lg border border-amber-300"
+                />
             <span className="text-sm font-semibold tracking-[0.16em] uppercase text-amber-50">
               Eagle Villas
             </span>

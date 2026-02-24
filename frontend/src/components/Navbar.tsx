@@ -51,14 +51,18 @@ export function Navbar() {
                 to="/"
                 className="flex items-center gap-2 px-[1.125rem] py-1.5"
               >
-                <div className="h-10 w-10 rounded-full border border-amber-300/80 bg-amber-100 flex items-center justify-center text-sm font-bold text-amber-900 shadow-md">
-                  EV
-                </div>
+                <img
+                  src="/images/logo/logo eagle villas.jpg"
+                  alt="Eagle Villas Logo"
+                  className="h-14 w-auto object-contain rounded-lg border border-amber-300"
+                />
+
                 <span className="text-lg md:text-xl font-bold tracking-[0.16em] uppercase text-stone-900">
                   Eagle Villas
                 </span>
               </Link>
             </div>
+
 
             {/* Center: main nav pills (desktop) */}
             <nav className="hidden md:flex items-center gap-4 lg:gap-6 absolute left-1/2 -translate-x-1/2">
