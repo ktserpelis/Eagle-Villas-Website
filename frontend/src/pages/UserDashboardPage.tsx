@@ -205,7 +205,7 @@ const UserDashboard: React.FC = () => {
 
         <div className="grid gap-6 lg:gap-8 xl:gap-10 lg:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)] items-start">
           {/* LEFT COLUMN — BOOKINGS */}
-          <div className="space-y-6 text-left">
+          <div className="space-y-6">
             <div className="rounded-3xl border border-stone-200/70 bg-white/80 backdrop-blur-md shadow-[0_18px_55px_rgba(0,0,0,0.10)] overflow-hidden">
               <div className="px-5 sm:px-6 py-5 border-b border-stone-200/70">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

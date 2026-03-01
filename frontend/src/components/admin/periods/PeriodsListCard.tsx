@@ -10,7 +10,16 @@ function bpsToPercentText(bps?: number | null) {
 }
 
 function dateOnly(iso: string) {
-  return iso?.slice?.(0, 10) ?? iso;
+  if (!iso) return iso;
+
+  const date = new Date(iso);
+  if (isNaN(date.getTime())) return iso;
+
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = String(date.getFullYear()).slice(-2); // last 2 digits
+
+  return `${day}/${month}/${year}`;
 }
 
 export default function PeriodsListCard({ periods, onToggleOpen, onDelete }: Props) {
