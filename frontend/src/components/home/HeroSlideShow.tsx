@@ -17,7 +17,7 @@ const slides = [
   },
   {
     id: 3,
-    image: "/images/homeherosplit/image00021.webp",
+    image: "/images/Screenshot 2025-01-28 183306.png",
     title: "Refined elegance with panoramic views",
     subtitle: "Wake up to Ionian blue horizons, relax on sun-drenched terraces, and experience true privacy in a setting designed for unforgettable moments.",
   },

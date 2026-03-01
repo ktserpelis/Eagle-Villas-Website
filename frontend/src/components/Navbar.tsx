@@ -54,7 +54,7 @@ export function Navbar() {
                 <img
                   src="/images/logo/logo eagle villas.jpg"
                   alt="Eagle Villas Logo"
-                  className="h-14 w-auto object-contain rounded-lg border border-amber-300"
+                  className="h-12 w-auto object-contain rounded-lg border border-amber-300"
                 />
 
                 <span className="text-lg md:text-xl font-bold tracking-[0.16em] uppercase text-stone-900">

@@ -9,7 +9,7 @@ export default function ContactPage() {
       {/* Top hero image – tall, clean */}
       <div className="relative w-full h-[80vh]">
         <img
-          src="/images/homehero/Screenshot 2025-01-28 183637.webp"
+          src="\images\467155489_452922644492496_8854503257217375100_n.jpg"
           alt="Contact Eagle Villas"
           className="w-full h-full object-cover"
         />
