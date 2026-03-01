@@ -21,22 +21,59 @@ function badgeClass(source: string, status?: string) {
   return "bg-yellow-100 text-yellow-700";
 }
 
-function normalizeSource(b: any): "DIRECT" | "BOOKING_COM" | "MANUAL" {
+/**
+ * UI classification rules
+ *
+ * Requirement:
+ * - Admin-created bookings are stored as DIRECT bookings in the DB, but we want to categorize them
+ *   as MANUAL in this admin list UI so a client can filter "Manual" and see all admin-made holds.
+ *
+ * - However, admin-created bookings must still display the full DIRECT booking details when expanded,
+ *   because they are real bookings (not manualBlock records) and contain guest/payment/price info.
+ *
+ * Therefore we separate:
+ * - category: what the badge + filter shows (DIRECT | BOOKING_COM | MANUAL)
+ * - kind: what details panel renders (BOOKING vs BLOCK)
+ */
+type DisplayCategory = "DIRECT" | "BOOKING_COM" | "MANUAL";
+type DetailsKind = "BOOKING" | "BLOCK";
+
+function isAdminDirectBooking(b: any) {
+  return (b?.source ?? "DIRECT") === "DIRECT" && b?.payment?.provider === "admin";
+}
+
+function displayCategory(b: any): DisplayCategory {
   const s = (b?.source ?? "DIRECT") as string;
+
   if (s === "BOOKING_COM") return "BOOKING_COM";
   if (s === "MANUAL") return "MANUAL";
+
+  // Admin-created DIRECT bookings are shown as MANUAL in this UI
+  if (s === "DIRECT" && isAdminDirectBooking(b)) return "MANUAL";
+
   return "DIRECT";
 }
 
-function getStatus(b: any, source: string) {
-  if (source === "DIRECT") return b?.status ?? "pending";
-  if (source === "BOOKING_COM") return "confirmed";
+function detailsKind(b: any): DetailsKind {
+  // Admin direct bookings must still render the full booking details panel
+  if (isAdminDirectBooking(b)) return "BOOKING";
+
+  const s = (b?.source ?? "DIRECT") as string;
+  if (s === "DIRECT") return "BOOKING";
+  if (s === "BOOKING_COM") return "BOOKING";
+  return "BLOCK";
+}
+
+function getStatus(b: any, category: DisplayCategory) {
+  if (category === "DIRECT") return b?.status ?? "pending";
+  if (category === "BOOKING_COM") return "confirmed";
   return "blocked";
 }
 
 function keyOf(b: any) {
-  const source = normalizeSource(b);
-  return `${source}:${b?.id ?? "unknown"}`;
+  // Stable key based on DB identity, not UI category (category can be derived/mapped)
+  const raw = (b?.source ?? "DIRECT") as string;
+  return `${raw}:${b?.id ?? "unknown"}`;
 }
 
 function isOngoing(startISO: string, endISO: string) {
@@ -125,7 +162,16 @@ const AdminBookingsSection: React.FC = () => {
 
   const bookingIdSearch = useMemo(() => parseBookingId(debouncedQuery), [debouncedQuery]);
 
-  // Main query (DIRECT paginated + blocks windowed by backend when source includes them)
+  /**
+   * Backend filtering:
+   * - Keep using the requested source filter for the API call.
+   * - MANUAL should return manual blocks (and any backend-defined manual items).
+   *
+   * UI filtering:
+   * - We will map admin-created DIRECT bookings to MANUAL using displayCategory().
+   * - This means the MANUAL filter can show both manual blocks and admin-created bookings,
+   *   without changing backend schemas or booking/payment creation.
+   */
   const mainQueryParams = useMemo(() => {
     return {
       source: sourceFilter,
@@ -173,7 +219,15 @@ const AdminBookingsSection: React.FC = () => {
     });
   }, [bookingsData?.bookings, bookingIdSearch, cursorId]);
 
-  const bookings = accumulated;
+  /**
+   * UI filtering:
+   * - When a dropdown filter is selected, filter by displayCategory() (UI category), not raw DB source.
+   * - This allows admin-created DIRECT bookings to appear under MANUAL in this UI.
+   */
+  const bookings = useMemo(() => {
+    if (sourceFilter === "ALL") return accumulated;
+    return accumulated.filter((b) => displayCategory(b) === sourceFilter);
+  }, [accumulated, sourceFilter]);
 
   // Cancelled query: only fetch when the section is opened.
   const canQueryCancelled =
@@ -246,20 +300,21 @@ const AdminBookingsSection: React.FC = () => {
 
   const counts = useMemo(() => {
     const all = bookings as any[];
-    const direct = all.filter((b) => normalizeSource(b) === "DIRECT").length;
-    const bcom = all.filter((b) => normalizeSource(b) === "BOOKING_COM").length;
-    const manual = all.filter((b) => normalizeSource(b) === "MANUAL").length;
+    const direct = all.filter((b) => displayCategory(b) === "DIRECT").length;
+    const bcom = all.filter((b) => displayCategory(b) === "BOOKING_COM").length;
+    const manual = all.filter((b) => displayCategory(b) === "MANUAL").length;
 
     const cancelledCount = (cancelledBookings as any[]).filter(
-      (b) => normalizeSource(b) === "DIRECT"
+      (b) => displayCategory(b) === "DIRECT"
     ).length;
 
     return { total: all.length, direct, bcom, manual, cancelledLoaded: cancelledCount };
   }, [bookings, cancelledBookings]);
 
   function Row({ b }: { b: any }) {
-    const source = normalizeSource(b);
-    const status = getStatus(b, source);
+    const category = displayCategory(b);
+    const kind = detailsKind(b);
+    const status = getStatus(b, category);
     const range = formatRange(b.startDate, b.endDate);
     const k = keyOf(b);
     const open = openKey === k;
@@ -268,16 +323,22 @@ const AdminBookingsSection: React.FC = () => {
     const propertyLoc =
       b?.property?.city && b?.property?.country ? `${b.property.city}, ${b.property.country}` : "";
 
+    /**
+     * Row summary info:
+     * - For any booking-like item (including admin-direct shown as MANUAL), show guest/email.
+     * - For manual blocks, show reason.
+     */
     let info = "—";
-    if (source === "DIRECT") {
+    if (kind === "BOOKING") {
       info = `${b?.guestName ?? ""}${b?.guestEmail ? ` · ${b.guestEmail}` : ""}`;
-    } else if (source === "BOOKING_COM") {
+    } else if (category === "BOOKING_COM") {
       info = b?.summary ?? "Booking.com reservation";
     } else {
       info = b?.reason ?? "Manual block";
     }
 
-    const total = source === "DIRECT" ? `€${b?.totalPrice ?? 0}` : "—";
+    // Show totals for booking-like items (including admin-direct shown as MANUAL)
+    const total = kind === "BOOKING" ? `€${b?.totalPrice ?? 0}` : "—";
 
     return (
       <div className="border rounded-lg bg-white">
@@ -291,16 +352,16 @@ const AdminBookingsSection: React.FC = () => {
             <div className="flex items-center gap-2">
               <span
                 className={`text-xs font-semibold px-2 py-1 rounded-full ${badgeClass(
-                  source,
+                  category,
                   b?.status
                 )}`}
               >
-                {source}
+                {category}
               </span>
 
               <div className="font-semibold text-slate-900 truncate">
                 {propertyTitle}
-                {source === "DIRECT" && (
+                {kind === "BOOKING" && (
                   <span className="ml-2 text-xs font-semibold text-slate-500">#{b.id}</span>
                 )}
               </div>
@@ -319,7 +380,7 @@ const AdminBookingsSection: React.FC = () => {
               <div className="text-sm font-semibold text-slate-900">{total}</div>
               <span
                 className={`text-xs font-semibold px-2 py-1 rounded-full ${badgeClass(
-                  source,
+                  category,
                   b?.status
                 )}`}
               >
@@ -334,7 +395,7 @@ const AdminBookingsSection: React.FC = () => {
 
         {open && (
           <div className="px-3 pb-3">
-            {source === "DIRECT" ? (
+            {kind === "BOOKING" ? (
               <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                 <div className="rounded border bg-white p-3">
                   <div className="text-xs font-semibold text-slate-500 mb-1">Guest</div>
@@ -386,8 +447,7 @@ const AdminBookingsSection: React.FC = () => {
                       Cash refunded:{" "}
                       <span className="font-semibold text-slate-900">
                         €{(
-                          ((b.refundedTotalCents ?? b.payment?.refundedCents ?? 0) as number) /
-                          100
+                          ((b.refundedTotalCents ?? b.payment?.refundedCents ?? 0) as number) / 100
                         ).toFixed(2)}
                       </span>
                     </div>
@@ -414,35 +474,34 @@ const AdminBookingsSection: React.FC = () => {
                         {Math.max(
                           0,
                           Math.round(
-                            (new Date(b.endDate).getTime() - new Date(b.startDate).getTime()) / 86400000
+                            (new Date(b.endDate).getTime() - new Date(b.startDate).getTime()) /
+                              86400000
                           )
                         )}
                       </span>
-                </div>
+                    </div>
 
-                  <div className="text-slate-700">
-                    Guests (counted):{" "}
-                    <span className="font-semibold text-slate-900">{b.guestsCount}</span>
-                  </div>
+                    <div className="text-slate-700">
+                      Guests (counted):{" "}
+                      <span className="font-semibold text-slate-900">{b.guestsCount}</span>
+                    </div>
 
-                  <div className="text-slate-700">
-                    Total (gross):{" "}
-                    <span className="font-semibold text-slate-900">€{b.totalPrice}</span>
-                  </div>
+                    <div className="text-slate-700">
+                      Total (gross):{" "}
+                      <span className="font-semibold text-slate-900">€{b.totalPrice}</span>
+                    </div>
 
-                  <div className="text-xs text-slate-500 mt-2">
-                    Nights are calculated from start/end dates (date-only).
+                    <div className="text-xs text-slate-500 mt-2">
+                      Nights are calculated from start/end dates (date-only).
+                    </div>
                   </div>
-                </div>
                 </div>
               </div>
-            ) : source === "BOOKING_COM" ? (
+            ) : category === "BOOKING_COM" ? (
               <div className="mt-2 rounded border bg-white p-3 text-sm">
                 <div className="text-xs font-semibold text-slate-500 mb-1">Booking.com</div>
                 <div className="font-semibold text-slate-900">{b.summary ?? "Reserved"}</div>
-                <div className="text-slate-700">
-                  Note: iCal usually doesn’t include guest contact details.
-                </div>
+                <div className="text-slate-700">Note: iCal usually doesn’t include guest contact details.</div>
               </div>
             ) : (
               <div className="mt-2 rounded border bg-white p-3 text-sm">
@@ -463,8 +522,7 @@ const AdminBookingsSection: React.FC = () => {
     Boolean(nextCursorId);
 
   // Cancelled pagination only when cancelled is open and the cancelled query is enabled.
-  const canLoadMoreCancelled =
-    canQueryCancelled && Boolean(cancelledNextCursorId);
+  const canLoadMoreCancelled = canQueryCancelled && Boolean(cancelledNextCursorId);
 
   return (
     <section className="bg-white rounded-lg shadow p-6 space-y-4">
